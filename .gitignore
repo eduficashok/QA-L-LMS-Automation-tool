@@ -1,0 +1,14 @@
+.venv/
+.auth/
+reports/
+screenshots/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+*.log
+*.before*
+*_backup.py
+*.bak
+.DS_Store
+Thumbs.db

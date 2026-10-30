@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson 1: Welcome &amp; Media Diagnostics</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        .user_content { max-width: 800px; line-height: 1.6; }
+        .image-box { margin: 1.5rem 0; padding: 1rem; border: 1px dashed #ccc; }
+        .link-list { margin: 1.5rem 0; }
+        .embed-box { margin: 1.5rem 0; padding: 1rem; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>Lesson 1: Welcome &amp; Media Diagnostics</h1>
+        <div class="user_content">
+            <p>This sample page tests the Canvas LMS Quality Control tool against all check rules.</p>
+
+            <h2>1. Image Verification</h2>
+            <div class="image-box">
+                <p><strong>Working Image (Valid PNG):</strong></p>
+                <!-- Working image -->
+                <img src="sample_good.png" alt="Working Course Logo" style="border: 1px solid #ccc;">
+            </div>
+
+            <div class="image-box">
+                <p><strong>Broken Image (Non-existent 404 image):</strong></p>
+                <!-- Broken image that fails to load and has naturalWidth == 0 -->
+                <img src="missing_broken_diagram.png" alt="Missing Architecture Diagram" style="min-width: 100px; min-height: 50px;">
+            </div>
+
+            <h2>2. Link Verification</h2>
+            <div class="link-list">
+                <ul>
+                    <!-- Working link -->
+                    <li><a href="page2.html">Working Link to Lesson 2 (HTTP 200)</a></li>
+                    <!-- Confirmed broken link -->
+                    <li><a href="broken_404_page.html">Confirmed Broken Link (HTTP 404)</a></li>
+                    <!-- Auth / Login redirect link (Should NOT be marked broken FAIL) -->
+                    <li><a href="/login?redirect=course350">University SSO Auth Portal (Auth redirect)</a></li>
+                </ul>
+            </div>
+
+            <h2>3. Videos &amp; Embeds</h2>
+            <div class="embed-box">
+                <p><strong>HTML5 Video Embed (Should be recorded as NOT TESTED):</strong></p>
+                <video src="lecture_intro.mp4" title="Lecture Video Intro" controls width="400"></video>
+            </div>
+
+            <div class="embed-box">
+                <p><strong>IFrame Embed (Should be recorded as NOT TESTED):</strong></p>
+                <iframe src="https://example.com/embed" title="Interactive Simulation Frame" width="400" height="200"></iframe>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

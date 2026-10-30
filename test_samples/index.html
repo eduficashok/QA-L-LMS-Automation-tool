@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas Mock Course 350: Modules</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        .context_module { border: 1px solid #ccc; margin-bottom: 1.5rem; border-radius: 6px; }
+        .header { background: #f4f4f4; padding: 1rem; font-weight: bold; }
+        .context_module_item { padding: 0.75rem 1rem; border-top: 1px solid #eee; display: flex; align-items: center; }
+        .context_module_sub_header { background: #fafafa; font-weight: bold; color: #555; }
+        .type_wiki_page .title { color: #0056b3; text-decoration: none; }
+        .type_assignment .title { color: #0056b3; text-decoration: none; }
+        .badge { font-size: 0.75rem; background: #e0e0e0; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: auto; }
+    </style>
+</head>
+<body>
+    <h1>Canvas Mock Course 350: Quality Control Verification</h1>
+    <div id="context_modules">
+        <!-- Module 1 -->
+        <div class="context_module" data-module-id="101">
+            <div class="header">
+                <span class="name">Module 1: Orientation &amp; Fundamentals</span>
+            </div>
+            <div class="content">
+                <!-- Subheader: Should be SKIPPED -->
+                <div class="context_module_item context_module_sub_header">
+                    <span class="title">Section A: Core Reading Material (Subheader)</span>
+                    <span class="badge">Subheader</span>
+                </div>
+
+                <!-- Page with 1 working img, 1 broken img, links, embeds: Should be SCANNED (FAIL) -->
+                <div class="context_module_item type_wiki_page">
+                    <span class="item_name">
+                        <a class="title" href="page1.html">Lesson 1: Welcome &amp; Media Diagnostics</a>
+                    </span>
+                    <span class="badge">Canvas Page</span>
+                </div>
+
+                <!-- Clean Page: Should be SCANNED (PASS) -->
+                <div class="context_module_item type_wiki_page">
+                    <span class="item_name">
+                        <a class="title" href="page2.html">Lesson 2: Clean Content Standards</a>
+                    </span>
+                    <span class="badge">Canvas Page</span>
+                </div>
+
+                <!-- External LTI Tool: Should be SKIPPED -->
+                <div class="context_module_item type_context_external_tool">
+                    <span class="item_name">
+                        <a class="title" href="/external_tools/42">External Interactive Simulation (LTI)</a>
+                    </span>
+                    <span class="badge">External Tool</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
