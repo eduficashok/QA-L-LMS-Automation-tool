@@ -12,3 +12,5 @@ __pycache__/
 *.bak
 .DS_Store
 Thumbs.db
+cloudflared.exe
+*.exe

@@ -1,0 +1,37 @@
+========================================================================
+   LMS QA Automation Tool - Quick Start Guide for macOS (MacBook)
+========================================================================
+
+HOW TO RUN ON YOUR MAC (Takes 10 seconds):
+------------------------------------------------------------------------
+
+1. UNZIP the folder to your Desktop or Downloads.
+
+2. DOUBLE-CLICK this file:
+   👉 start_mac.command
+
+3. THAT'S IT! 
+   - A Safari/Chrome browser window will automatically open with the 
+     LMS QA Dashboard at: http://127.0.0.1:8080
+   - (First time only: It will take ~1 minute to automatically set up 
+     the browser engine in the background).
+
+------------------------------------------------------------------------
+HOW TO SCAN A COURSE:
+------------------------------------------------------------------------
+1. Select "Canvas QC Scanner" or "Blackboard Ultra Inventory".
+2. Paste the Course URL.
+3. Click "Start Automated QC Scan".
+4. If your University SSO login appears, log in once and click 
+   "Confirm Login & Continue" on the dashboard.
+5. View the complete HTML report with broken images, broken links, 
+   and screenshots directly in your browser!
+
+------------------------------------------------------------------------
+NOTE FOR FIRST-TIME RUN:
+If macOS says "Cannot open start_mac.command because it is from an 
+unidentified developer":
+1. Right-click (or Control+Click) on start_mac.command
+2. Click "Open"
+3. Click "Open" again in the popup.
+========================================================================

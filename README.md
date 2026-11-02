@@ -27,11 +27,23 @@ py -3 -m venv .venv
 `setup.ps1` runs the first three setup steps if local script policy permits it. Do not weaken execution policy just to run the helper; use the commands above instead.
 Do not copy .venv from another computer. Proxy/package download restrictions may require your institution's IT.
 
-## Full read-only workflow
+## Web Control Dashboard (Recommended)
+
+Run the interactive local Web Dashboard for a visual UI, live error cards, and embedded report preview:
 
 ```powershell
-.\.venv\Scripts\python.exe run_workflow.py --browser msedge
+# Double click start_dashboard.bat OR run in PowerShell:
+.\start_dashboard.bat
+# Or using Python directly:
+.\.venv\Scripts\python.exe web_dashboard_server.py --port 8080
 ```
+- Open `http://127.0.0.1:8080` in your browser.
+- Select **Canvas QC**, **Blackboard Inventory**, **Full Workflow Compare**, or **Quick Mock Test**.
+- No terminal typing needed: confirm university logins with a single click in the Web UI.
+- Direct tables listing broken images (with screenshot evidence popups), broken links (HTTP 404/500), and missing items.
+- Interactive HTML report viewer with new-window & download options.
+
+## Full read-only workflow (Command-Line)
 
 1. Edge opens Blackboard course `_268444_1`.
 2. Log in inside that window, complete MFA, confirm Financial Technology Individual Project MEC outline is visible.

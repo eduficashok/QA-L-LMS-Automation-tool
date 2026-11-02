@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS QA Automation Tool • Quality & Outline Inspection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-surface: #111827;
+            --bg-surface-elevated: #162032;
+            --bg-card: rgba(22, 32, 50, 0.7);
+            --border-subtle: #1f2d45;
+            --border-strong: #2e3e5c;
+            --primary: #0284c7;
+            --primary-glow: rgba(2, 132, 199, 0.35);
+            --accent-cyan: #38bdf8;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 20px -3px var(--primary-glow);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+
+        /* Top Bar */
+        header.top-nav {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0.85rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .status-pill-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-strong);
+            background: var(--bg-surface-elevated);
+        }
+
+        .status-pill.idle { color: var(--text-muted); }
+        .status-pill.running {
+            color: var(--accent-cyan);
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(56, 189, 248, 0.1);
+        }
+        .status-pill.waiting {
+            color: var(--accent-amber);
+            border-color: rgba(245, 158, 11, 0.5);
+            background: rgba(245, 158, 11, 0.12);
+            animation: pulse-border 1.5s infinite;
+        }
+        .status-pill.done {
+            color: var(--accent-emerald);
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .status-pill.error {
+            color: var(--accent-rose);
+            border-color: rgba(244, 63, 94, 0.4);
+            background: rgba(244, 63, 94, 0.1);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            display: inline-block;
+        }
+        .running .pulse-dot, .waiting .pulse-dot {
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+        }
+
+        /* Main Layout */
+        main.app-shell {
+            max-width: 1380px;
+            width: 100%;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem 3rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Login Required Hero Banner */
+        .login-alert-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+            border: 2px solid var(--accent-amber);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.75rem;
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .login-alert-banner.active {
+            display: flex;
+        }
+
+        .login-alert-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .login-icon-box {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-amber);
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .login-text h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.2rem;
+        }
+
+        .login-text p {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .btn-confirm-login {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-confirm-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        /* Mode Selection Grid */
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .mode-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card:hover {
+            border-color: var(--border-strong);
+            background: var(--bg-surface-elevated);
+            transform: translateY(-2px);
+        }
+
+        .mode-card.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(2, 132, 199, 0.12);
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.2);
+        }
+
+        .mode-card.selected::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-cyan);
+        }
+
+        .mode-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-icon {
+            font-size: 1.3rem;
+        }
+
+        .mode-title {
+            font-weight: 600;
+            font-size: 0.98rem;
+            color: #ffffff;
+        }
+
+        .mode-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Config Card */
+        .config-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-input, .form-select {
+            background: var(--bg-base);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 0.9rem;
+            font-size: 0.88rem;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s ease;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.4rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 0.85rem;
+            color: var(--text-main);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.85rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.18s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        }
+
+        .btn-secondary {
+            background: var(--bg-surface-elevated);
+            border-color: var(--border-strong);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #1e2d42;
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-danger {
+            background: rgba(244, 63, 94, 0.15);
+            border-color: rgba(244, 63, 94, 0.4);
+            color: var(--accent-rose);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: rgba(244, 63, 94, 0.25);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Metric Highlights */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.15rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .metric-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .metric-icon-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .metric-card.defect .metric-value { color: var(--accent-rose); }
+        .metric-card.defect .metric-icon-badge { background: rgba(244, 63, 94, 0.12); color: var(--accent-rose); }
+
+        .metric-card.warning .metric-value { color: var(--accent-amber); }
+        .metric-card.warning .metric-icon-badge { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); }
+
+        .metric-card.pass .metric-value { color: var(--accent-emerald); }
+        .metric-card.pass .metric-icon-badge { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); }
+
+        .metric-card.neutral .metric-value { color: var(--accent-cyan); }
+        .metric-card.neutral .metric-icon-badge { background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); }
+
+        /* Navigation Tabs */
+        .tabs-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.6rem 1.15rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-surface-elevated);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        .badge-count {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-strong);
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        /* Tab Content Panes */
+        .tab-pane {
+            display: none;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .tab-pane.active {
+            display: flex;
+        }
+
+        /* Error Cards & Listings */
+        .error-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .defect-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .defect-table th {
+            background: var(--bg-surface-elevated);
+            color: var(--text-muted);
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .defect-table td {
+            padding: 0.85rem 1rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border-subtle);
+            vertical-align: middle;
+        }
+
+        .defect-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .defect-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tag-badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-fail { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+        .tag-pass { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .tag-warn { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        .btn-view-shot {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-strong);
+            color: var(--accent-cyan);
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-view-shot:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--accent-cyan);
+        }
+
+        .empty-placeholder {
+            background: var(--bg-surface);
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .empty-placeholder svg {
+            width: 48px;
+            height: 48px;
+            color: var(--text-dim);
+        }
+
+        /* Reports Viewer Pane */
+        .report-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-surface);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .report-frame-container {
+            width: 100%;
+            height: 750px;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: var(--shadow-card);
+        }
+
+        .report-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Terminal Logs Pane */
+        .terminal-box {
+            background: #060911;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            height: 480px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Screenshot Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-body {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        .modal-close-btn:hover { color: #ffffff; }
+
+        .modal-img-wrap {
+            padding: 1rem;
+            overflow: auto;
+            text-align: center;
+            background: #0b0f17;
+        }
+
+        .modal-img-wrap img {
+            max-width: 100%;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="top-nav">
+        <div class="brand-container">
+            <div class="brand-badge">QA</div>
+            <div>
+                <h1 class="brand-title">LMS Automation Control Hub</h1>
+                <p class="brand-subtitle">Canvas Quality Control &bull; Blackboard Ultra Outline &bull; Comparison</p>
+            </div>
+        </div>
+
+        <div class="status-pill-group">
+            <div id="liveTimer" style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">00:00</div>
+            <div id="statusPill" class="status-pill idle">
+                <span class="pulse-dot"></span>
+                <span id="statusLabel">Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-shell">
+
+        <!-- Login / SSO Required Action Banner -->
+        <div id="loginBanner" class="login-alert-banner">
+            <div class="login-alert-info">
+                <div class="login-icon-box">🔐</div>
+                <div class="login-text">
+                    <h3 id="loginLmsTitle">University Single Sign-On (SSO) / MFA Required</h3>
+                    <p id="loginPromptMessage">A browser window is open. Sign in to your university account, navigate to the course, then click Continue.</p>
+                </div>
+            </div>
+            <button id="btnConfirmLogin" class="btn-confirm-login" onclick="confirmLoginAction()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Confirm Login &amp; Continue Scan
+            </button>
+        </div>
+
+        <!-- Mode Selector Cards -->
+        <section class="modes-grid">
+            <div class="mode-card selected" data-mode="canvas" onclick="selectMode('canvas')">
+                <div class="mode-header">
+                    <span class="mode-icon">🎨</span>
+                    <h3 class="mode-title">Canvas QC Scanner</h3>
+                </div>
+                <p class="mode-desc">Inspects modules for broken rendered images, broken/auth links, embedded media, and captures screenshots.</p>
+            </div>
+
+            <div class="mode-card" data-mode="blackboard" onclick="selectMode('blackboard')">
+                <div class="mode-header">
+                    <span class="mode-icon">📋</span>
+                    <h3 class="mode-title">Blackboard Ultra Inventory</h3>
+                </div>
+                <p class="mode-desc">Expands folders and modules, records item IDs, titles, parent hierarchy, and visibility states.</p>
+            </div>
+
+            <div class="mode-card" data-mode="workflow" onclick="selectMode('workflow')">
+                <div class="mode-header">
+                    <span class="mode-icon">🔄</span>
+                    <h3 class="mode-title">Full Workflow &amp; Compare</h3>
+                </div>
+                <p class="mode-desc">Sequentially scans Blackboard, then Canvas, and generates a conservative title comparison report.</p>
+            </div>
+
+            <div class="mode-card" data-mode="mock_canvas" onclick="selectMode('mock_canvas')">
+                <div class="mode-header">
+                    <span class="mode-icon">🧪</span>
+                    <h3 class="mode-title">Local Mock Test (No Login)</h3>
+                </div>
+                <p class="mode-desc">Safe diagnostic run against synthetic local sample pages. Verifies image &amp; link detection in 3 seconds.</p>
+            </div>
+        </section>
+
+        <!-- Configuration & Actions Panel -->
+        <section class="config-card">
+            <div class="config-grid">
+                <div class="form-group" id="groupCanvasUrl">
+                    <label class="form-label" for="inputCanvasUrl">Canvas Course URL</label>
+                    <input type="text" id="inputCanvasUrl" class="form-input" value="https://www.ole.mumbai.bristol.ac.uk/courses/350">
+                </div>
+
+                <div class="form-group" id="groupBbUrl">
+                    <label class="form-label" for="inputBbUrl">Blackboard Outline URL</label>
+                    <input type="text" id="inputBbUrl" class="form-input" value="https://www.ole.bris.ac.uk/ultra/courses/_268444_1/outline">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="selectBrowser">Browser Engine</label>
+                    <select id="selectBrowser" class="form-select">
+                        <option value="msedge" selected>Microsoft Edge (Recommended for SSO/MFA)</option>
+                        <option value="chrome">Google Chrome</option>
+                        <option value="chromium">Playwright Chromium</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="inputMaxPages">Max Pages (Optional Spot Check)</label>
+                    <input type="number" id="inputMaxPages" class="form-input" placeholder="Leave empty to scan all modules">
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="checkHeadless">
+                <label for="checkHeadless">Run Headless (Visible browser unchecked is recommended for University MFA/SSO login)</label>
+            </div>
+
+            <div class="actions-bar">
+                <button id="btnLaunchScan" class="btn btn-primary" onclick="startScanAction()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Start Automated QC Scan
+                </button>
+
+                <button id="btnMockTest" class="btn btn-secondary" onclick="quickMockTest()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                    Run Quick Mock Test (3s)
+                </button>
+
+                <button id="btnCancelScan" class="btn btn-danger" onclick="cancelScanAction()" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                    Cancel Run
+                </button>
+            </div>
+        </section>
+
+        <!-- Metrics Overview -->
+        <section class="metrics-grid">
+            <div class="metric-card defect">
+                <div class="metric-content">
+                    <span class="metric-label">Broken Images</span>
+                    <span id="metricBrokenImages" class="metric-value">0</span>
+                </div>
+                <div class="metric-icon-badge">🖼️</div>
+            </div>
+
+            <div class="metric-card defect">
+                <div class="metric-content">
+                    <span class="metric-label">Broken Links</span>
+                    <span id="metricBrokenLinks" class="metric-value">0</span>
+                </div>
+                <div class="metric-icon-badge">🔗</div>
+            </div>
+
+            <div class="metric-card warning">
+                <div class="metric-content">
+                    <span class="metric-label">SSO / Auth Redirects</span>
+                    <span id="metricAuthLinks" class="metric-value">0</span>
+                </div>
+                <div class="metric-icon-badge">🔒</div>
+            </div>
+
+            <div class="metric-card pass">
+                <div class="metric-content">
+                    <span class="metric-label">Scanned Pages</span>
+                    <span id="metricScannedPages" class="metric-value">0</span>
+                </div>
+                <div class="metric-icon-badge">📄</div>
+            </div>
+        </section>
+
+        <!-- Tabs Navigation -->
+        <nav class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('defects')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Exact Defects &amp; Errors
+                <span id="tabDefectBadge" class="badge-count">0</span>
+            </button>
+
+            <button class="tab-btn" onclick="switchTab('reports')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                HTML Reports Viewer
+            </button>
+
+            <button class="tab-btn" onclick="switchTab('logs')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                Live Execution Logs
+            </button>
+        </nav>
+
+        <!-- TAB 1: EXACT DEFECTS & ERRORS -->
+        <section id="paneDefects" class="tab-pane active">
+
+            <!-- Broken Images Table -->
+            <div>
+                <h3 class="error-section-title">
+                    <span style="color: var(--accent-rose);">●</span> Broken Rendered Images (Failures)
+                </h3>
+                <div id="brokenImagesContainer">
+                    <table class="defect-table" id="tableBrokenImages">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Page Title</th>
+                                <th style="width: 35%;">Image URL</th>
+                                <th style="width: 25%;">Error Reason</th>
+                                <th style="width: 15%;">Evidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyBrokenImages">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Broken Links Table -->
+            <div style="margin-top: 1rem;">
+                <h3 class="error-section-title">
+                    <span style="color: var(--accent-rose);">●</span> Broken Authenticated Links (404/500 Errors)
+                </h3>
+                <div id="brokenLinksContainer">
+                    <table class="defect-table" id="tableBrokenLinks">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Page Title</th>
+                                <th style="width: 25%;">Link Text</th>
+                                <th style="width: 30%;">Target Destination</th>
+                                <th style="width: 20%;">Failure Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyBrokenLinks">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Blackboard & Comparison Issues -->
+            <div style="margin-top: 1rem;" id="sectionComparisonIssues">
+                <h3 class="error-section-title">
+                    <span style="color: var(--accent-amber);">●</span> Blackboard &amp; Comparison Outline Differences
+                </h3>
+                <div id="comparisonIssuesContainer">
+                    <table class="defect-table" id="tableComparisonIssues">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">Type</th>
+                                <th style="width: 30%;">Item Title</th>
+                                <th style="width: 50%;">Details / Recommendation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyComparisonIssues">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: HTML REPORTS VIEWER -->
+        <section id="paneReports" class="tab-pane">
+            <div class="report-controls">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);" for="selectReportFile">Report Document:</label>
+                    <select id="selectReportFile" class="form-select" style="min-width: 280px;" onchange="loadSelectedReport()">
+                        <option value="/reports/latest_report.html">latest_report.html (Canvas QC Report)</option>
+                        <option value="/reports/comparison_report.html">comparison_report.html (Outline Comparison)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a id="btnOpenNewTab" href="/reports/latest_report.html" target="_blank" class="btn btn-secondary" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;">
+                        Open in New Window ↗
+                    </a>
+                </div>
+            </div>
+
+            <div class="report-frame-container">
+                <iframe id="reportIframe" class="report-frame" src="/reports/latest_report.html"></iframe>
+            </div>
+        </section>
+
+        <!-- TAB 3: LIVE TERMINAL LOGS -->
+        <section id="paneLogs" class="tab-pane">
+            <div class="terminal-bar">
+                <span style="font-size: 0.8rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">Console Output Stream</span>
+                <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;" onclick="clearLogs()">Clear Console</button>
+            </div>
+            <div id="terminalConsole" class="terminal-box">Waiting for automation scan to initiate...</div>
+        </section>
+
+    </main>
+
+    <!-- Screenshot Modal Preview -->
+    <div id="screenshotModal" class="modal-overlay" onclick="closeScreenshotModal(event)">
+        <div class="modal-body" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h4 id="modalImageTitle" class="modal-title">Broken Image Evidence Screenshot</h4>
+                <button class="modal-close-btn" onclick="closeScreenshotModal()">&times;</button>
+            </div>
+            <div class="modal-img-wrap">
+                <img id="modalImg" src="" alt="Defect screenshot">
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Javascript Logic -->
+    <script>
+        let currentMode = "canvas";
+        let pollInterval = null;
+        let isRunning = false;
+        let scanStartTime = null;
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-card').forEach(c => {
+                c.classList.toggle('selected', c.getAttribute('data-mode') === mode);
+            });
+
+            // Adjust input visibility based on mode
+            const groupCanvas = document.getElementById('groupCanvasUrl');
+            const groupBb = document.getElementById('groupBbUrl');
+            const checkHeadless = document.getElementById('checkHeadless');
+
+            if (mode === 'canvas') {
+                groupCanvas.style.display = 'flex';
+                groupBb.style.display = 'none';
+                checkHeadless.checked = false;
+            } else if (mode === 'blackboard') {
+                groupCanvas.style.display = 'none';
+                groupBb.style.display = 'flex';
+                checkHeadless.checked = false;
+            } else if (mode === 'workflow') {
+                groupCanvas.style.display = 'flex';
+                groupBb.style.display = 'flex';
+                checkHeadless.checked = false;
+            } else if (mode === 'mock_canvas') {
+                groupCanvas.style.display = 'none';
+                groupBb.style.display = 'none';
+                checkHeadless.checked = true;
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            if (tabId === 'defects') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('paneDefects').classList.add('active');
+                fetchErrors();
+            } else if (tabId === 'reports') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('paneReports').classList.add('active');
+                refreshReportsList();
+            } else if (tabId === 'logs') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('paneLogs').classList.add('active');
+            }
+        }
+
+        async function startScanAction() {
+            const canvasUrl = document.getElementById('inputCanvasUrl').value;
+            const bbUrl = document.getElementById('inputBbUrl').value;
+            const browser = document.getElementById('selectBrowser').value;
+            const headless = document.getElementById('checkHeadless').checked;
+            const maxPages = document.getElementById('inputMaxPages').value;
+
+            try {
+                const response = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mode: currentMode,
+                        canvas_url: canvasUrl,
+                        blackboard_url: bbUrl,
+                        browser: browser,
+                        headless: headless,
+                        max_pages: maxPages ? parseInt(maxPages) : null
+                    })
+                });
+
+                if (!response.ok) {
+                    let errMessage = 'Failed to start scan (HTTP ' + response.status + ')';
+                    try {
+                        const err = await response.json();
+                        if (err && err.error) errMessage = err.error;
+                    } catch (_) {
+                        errMessage = 'Server unreachable or offline (HTTP ' + response.status + '). Please ensure start_online_dashboard.bat or start_dashboard.bat is running.';
+                    }
+                    alert(errMessage);
+                    return;
+                }
+
+                // Switch to live monitoring
+                isRunning = true;
+                updateControlsRunning(true);
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            }
+        }
+
+        function quickMockTest() {
+            selectMode('mock_canvas');
+            startScanAction();
+        }
+
+        async function confirmLoginAction() {
+            try {
+                const response = await fetch('/api/confirm_login', { method: 'POST' });
+                const res = await response.json();
+                if (res.success) {
+                    document.getElementById('loginBanner').classList.remove('active');
+                }
+            } catch (err) {
+                console.error('Error confirming login:', err);
+            }
+        }
+
+        async function cancelScanAction() {
+            try {
+                await fetch('/api/cancel', { method: 'POST' });
+            } catch (err) {
+                console.error('Error cancelling scan:', err);
+            }
+        }
+
+        async function pollStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+
+                updateStatusUI(data);
+
+                // Update logs
+                if (data.logs && data.logs.length > 0) {
+                    const term = document.getElementById('terminalConsole');
+                    term.textContent = data.logs.join('\n');
+                    term.scrollTop = term.scrollHeight;
+                }
+
+                // If finished or state changed, fetch errors
+                if (data.state === 'DONE' && isRunning) {
+                    isRunning = false;
+                    updateControlsRunning(false);
+                    fetchErrors();
+                    refreshReportsList();
+                } else if (data.state === 'ERROR' && isRunning) {
+                    isRunning = false;
+                    updateControlsRunning(false);
+                    fetchErrors();
+                }
+            } catch (e) {
+                console.warn('Status poll warning:', e);
+            }
+        }
+
+        function updateStatusUI(data) {
+            const pill = document.getElementById('statusPill');
+            const label = document.getElementById('statusLabel');
+            const loginBanner = document.getElementById('loginBanner');
+            const timer = document.getElementById('liveTimer');
+
+            pill.className = 'status-pill ' + data.state.toLowerCase();
+
+            if (data.state === 'IDLE') {
+                label.textContent = 'Ready';
+                loginBanner.classList.remove('active');
+            } else if (data.state === 'RUNNING') {
+                label.textContent = 'Scanning...';
+                loginBanner.classList.remove('active');
+                isRunning = true;
+                updateControlsRunning(true);
+            } else if (data.state === 'WAITING_FOR_LOGIN') {
+                label.textContent = 'Awaiting SSO Login';
+                document.getElementById('loginLmsTitle').textContent = `University ${data.login_lms || 'LMS'} SSO / MFA Sign-In Required`;
+                document.getElementById('loginPromptMessage').textContent = data.login_prompt || 'A browser window has opened. Please log in, confirm outline visibility, and click Continue.';
+                loginBanner.classList.add('active');
+            } else if (data.state === 'DONE') {
+                label.textContent = 'Scan Complete';
+                loginBanner.classList.remove('active');
+            } else if (data.state === 'ERROR') {
+                label.textContent = data.last_error ? 'Scan Halted' : 'Cancelled';
+                loginBanner.classList.remove('active');
+            }
+
+            // Duration timer
+            if (data.duration_seconds !== undefined) {
+                const mins = Math.floor(data.duration_seconds / 60).toString().padStart(2, '0');
+                const secs = Math.floor(data.duration_seconds % 60).toString().padStart(2, '0');
+                timer.textContent = `${mins}:${secs}`;
+            }
+        }
+
+        function updateControlsRunning(running) {
+            document.getElementById('btnLaunchScan').disabled = running;
+            document.getElementById('btnMockTest').disabled = running;
+            document.getElementById('btnCancelScan').disabled = !running;
+        }
+
+        async function fetchErrors() {
+            try {
+                const res = await fetch('/api/errors');
+                const data = await res.json();
+                renderErrors(data);
+            } catch (err) {
+                console.error('Error fetching errors:', err);
+            }
+        }
+
+        function renderErrors(data) {
+            const canvas = data.canvas || {};
+            const bb = data.blackboard || {};
+            const comp = data.comparison || {};
+
+            const brokenImages = canvas.broken_images || [];
+            const brokenLinks = canvas.broken_links || [];
+            const authLinks = canvas.auth_links || [];
+            const totalDefects = brokenImages.length + brokenLinks.length;
+
+            // Update Metrics
+            document.getElementById('metricBrokenImages').textContent = brokenImages.length;
+            document.getElementById('metricBrokenLinks').textContent = brokenLinks.length;
+            document.getElementById('metricAuthLinks').textContent = authLinks.length;
+            document.getElementById('metricScannedPages').textContent = canvas.total_pages || 0;
+            document.getElementById('tabDefectBadge').textContent = totalDefects;
+
+            // Render Broken Images
+            const tbodyImg = document.getElementById('bodyBrokenImages');
+            tbodyImg.innerHTML = '';
+            if (brokenImages.length === 0) {
+                tbodyImg.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No broken images detected! All rendered images passed.</td></tr>`;
+            } else {
+                brokenImages.forEach(img => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${escapeHtml(img.page_title)}</strong></td>
+                        <td style="word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">${escapeHtml(img.src)}</td>
+                        <td><span class="tag-badge tag-fail">${escapeHtml(img.reason)}</span></td>
+                        <td>${img.screenshot ? `<button class="btn-view-shot" onclick="viewScreenshot('${img.screenshot}', '${escapeHtml(img.page_title)}')">🔍 Screenshot</button>` : '<span style="color: var(--text-dim);">-</span>'}</td>
+                    `;
+                    tbodyImg.appendChild(tr);
+                });
+            }
+
+            // Render Broken Links
+            const tbodyLink = document.getElementById('bodyBrokenLinks');
+            tbodyLink.innerHTML = '';
+            if (brokenLinks.length === 0) {
+                tbodyLink.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No broken HTTP links found.</td></tr>`;
+            } else {
+                brokenLinks.forEach(link => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${escapeHtml(link.page_title)}</strong></td>
+                        <td>${escapeHtml(link.text || '(empty anchor)')}</td>
+                        <td style="word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">${escapeHtml(link.href)}</td>
+                        <td><span class="tag-badge tag-fail">${escapeHtml(link.reason)}</span></td>
+                    `;
+                    tbodyLink.appendChild(tr);
+                });
+            }
+
+            // Render Comparison Issues
+            const tbodyComp = document.getElementById('bodyComparisonIssues');
+            tbodyComp.innerHTML = '';
+            let compIssues = [];
+
+            if (bb.issues && bb.issues.length > 0) {
+                bb.issues.forEach(issue => {
+                    compIssues.push({ type: 'Blackboard Outline', title: 'Folder/Module Structure', detail: issue, tag: 'tag-warn' });
+                });
+            }
+            if (comp.source_only && comp.source_only.length > 0) {
+                comp.source_only.forEach(item => {
+                    compIssues.push({ type: 'Missing in Canvas', title: item.title, detail: `Found in Blackboard outline (pos ${item.position}) but missing in Canvas`, tag: 'tag-fail' });
+                });
+            }
+            if (comp.target_only && comp.target_only.length > 0) {
+                comp.target_only.forEach(item => {
+                    compIssues.push({ type: 'Canvas Only', title: item.title, detail: `Found in Canvas Modules but not mapped to Blackboard`, tag: 'tag-warn' });
+                });
+            }
+
+            if (compIssues.length === 0) {
+                tbodyComp.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No outline mismatches recorded.</td></tr>`;
+            } else {
+                compIssues.forEach(ci => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><span class="tag-badge ${ci.tag}">${escapeHtml(ci.type)}</span></td>
+                        <td><strong>${escapeHtml(ci.title)}</strong></td>
+                        <td>${escapeHtml(ci.detail)}</td>
+                    `;
+                    tbodyComp.appendChild(tr);
+                });
+            }
+        }
+
+        async function refreshReportsList() {
+            try {
+                const res = await fetch('/api/reports');
+                const files = await res.json();
+                const sel = document.getElementById('selectReportFile');
+                sel.innerHTML = '';
+
+                files.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.url;
+                    opt.textContent = `${f.name} (${f.modified})`;
+                    sel.appendChild(opt);
+                });
+
+                if (files.length > 0) {
+                    loadSelectedReport();
+                }
+            } catch (err) {
+                console.error('Error fetching reports:', err);
+            }
+        }
+
+        function loadSelectedReport() {
+            const sel = document.getElementById('selectReportFile');
+            const iframe = document.getElementById('reportIframe');
+            const btnNewTab = document.getElementById('btnOpenNewTab');
+
+            iframe.src = sel.value;
+            btnNewTab.href = sel.value;
+        }
+
+        function viewScreenshot(url, title) {
+            document.getElementById('modalImageTitle').textContent = `Defect Evidence: ${title}`;
+            document.getElementById('modalImg').src = url;
+            document.getElementById('screenshotModal').classList.add('active');
+        }
+
+        function closeScreenshotModal(event) {
+            document.getElementById('screenshotModal').classList.remove('active');
+        }
+
+        function clearLogs() {
+            document.getElementById('terminalConsole').textContent = '';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Initialize polling on window load
+        window.addEventListener('DOMContentLoaded', () => {
+            selectMode('canvas');
+            pollStatus();
+            fetchErrors();
+            refreshReportsList();
+            pollInterval = setInterval(pollStatus, 1500);
+        });
+    </script>
+</body>
+</html>
