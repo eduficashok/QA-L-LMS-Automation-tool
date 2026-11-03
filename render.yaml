@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: lms-qa-eduficdigital
+    runtime: python
+    buildCommand: pip install -r requirements.txt && playwright install chromium && playwright install-deps chromium
+    startCommand: python web_dashboard_server.py --no-browser
+    envVars:
+      - key: PORT
+        generateValue: false
+    plan: free
