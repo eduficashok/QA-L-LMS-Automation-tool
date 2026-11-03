@@ -1,0 +1,29 @@
+[phases.setup]
+nixPkgs = [
+  "python312",
+  "chromium",
+  "chromium-driver",
+  "xvfb-run",
+  "glib",
+  "nss",
+  "nspr",
+  "atk",
+  "cups",
+  "dbus",
+  "expat",
+  "libxcomposite",
+  "libxdamage",
+  "libxfixes",
+  "libxrandr",
+  "libgbm",
+  "libxkbcommon",
+  "pango",
+  "cairo",
+  "alsa-lib"
+]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt", "playwright install chromium"]
+
+[start]
+cmd = "python web_dashboard_server.py --no-browser"

@@ -1,0 +1,6 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "playwright install chromium && playwright install-deps chromium && python web_dashboard_server.py --no-browser"
+restartPolicyType = "always"

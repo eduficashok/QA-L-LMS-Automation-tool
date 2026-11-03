@@ -567,11 +567,19 @@ def main():
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically open the browser")
     args = parser.parse_args()
 
-    port = find_available_port(args.port)
-    server_address = ("127.0.0.1", port)
+    # Support cloud deployment: use PORT env var if available (Railway, Render, etc.)
+    env_port = os.environ.get("PORT")
+    if env_port:
+        port = int(env_port)
+    else:
+        port = find_available_port(args.port)
+
+    # Bind to 0.0.0.0 for cloud, 127.0.0.1 for local
+    host = "0.0.0.0" if env_port else "127.0.0.1"
+    server_address = (host, port)
     httpd = DashboardServer(server_address, DashboardRequestHandler)
 
-    url = f"http://127.0.0.1:{port}"
+    url = f"http://{host}:{port}"
     print("=" * 75)
     print("   LMS QA AUTOMATION - WEB CONTROL DASHBOARD")
     print(f"   Server active at: {url}")
